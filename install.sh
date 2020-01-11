@@ -1,13 +1,28 @@
 #!/bin/bash
 
-#1) Install python dependencies
+#1) Create and activate environment
+ENVS=$(conda info --envs | awk '{print $1}' )
+if [[ $ENVS = *"TADATrain"* ]]; then
+   source activate DAClassifier
+else
+   echo "Creating a new conda environment for TADATrain project..."
+   conda create -n DAClassifier pip python=3.6
+   source activate DAClassifier
+   #exit
+fi;
 
+#2) Install python dependencies
 pip install nltk
 pip install scikit-learn
 pip install spacy
 python -m spacy download en
 
-#2) Download publicly available corpora
+
+#3) Download publicly available corpora
+if [ ! -d "data/Switchboard/" ] ; then
+    mkdir data/Switchboard
+fi
+
 if [ ! -d "data/Maptask/" ] ; then
     mkdir data/Maptask
 fi
@@ -19,6 +34,12 @@ fi
 if [ ! -d "data/Oasis" ] ; then
     mkdir data/Oasis
 fi
+
+if [ ! -d "data/Switchboard/corpus" ] ; then
+	echo "Downloading the Switchboard Dialog Act corpus"
+	cd data/Switchboard && mkdir corpus && cd corpus && wget https://web.stanford.edu/~jurafsky/swb1_dialogact_annot.tar.gz && tar xvzf swb1_dialogact_annot.tar.gz && rm -rf swb1_dialogact_annot.tar.gz
+fi
+
 
 if [ ! -d "data/Maptask/maptaskv2-1" ] ; then
 	echo "Downloading the Maptask corpus"
@@ -34,3 +55,4 @@ if [ ! -d "data/Oasis/corpus" ] ; then
 	echo "Downloading the Oasis corpus"
          mkdir corpus && cd corpus && wget http://groups.inf.ed.ac.uk/oasis/download/oasis_full_rel1.0.zip && unzip -q oasis_full_rel1.0.zip && rm -f oasis_full_rel1.0.zip && cd .. && mv corpus data/Oasis/corpus
 fi
+
